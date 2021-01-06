@@ -1,5 +1,7 @@
 ''' Sorry no comments :).
 '''
+print("######################### STARTING GENERATING DATAS #########################")
+
 import Goban 
 import importlib
 import time
@@ -12,12 +14,13 @@ import os, signal
 
 file_list = os.listdir('./data/')
 nb_files = len(file_list)
+print("Actuellement, " + str(nb_files) + " sont présents dans ./data/")
 MAX_NB_FILES = 1000
 
 if (nb_files <= MAX_NB_FILES):
-    file_name = './data/go_datas_' + str(nb_files) + '.json'
+    file_name = './data/go_datas_' + str(nb_files + 1) + '.json'
 else:
-    file_name = './data/go_datas_' + str(random.randint(0, nb_files -1)) + '.json'
+    file_name = './data/go_datas_' + str(random.randint(1, nb_files)) + '.json'
     
 if (os.path.exists(file_name)):
     os.remove(file_name)
@@ -30,7 +33,7 @@ def fileorpackage(name):
     return name
 
 
-def prepare_datas(board, care_about_win = False): # peut etre ne prendre que des gagnants, ou ne pas prendre en compte le fait qu'il ait perdu ?
+def prepare_datas(board, care_about_win = False, all_rotations = True): # peut etre ne prendre que des gagnants, ou ne pas prendre en compte le fait qu'il ait perdu ?
     datas = []
     nb_uses = random.randint(MIN_INFO_FROM_ONE_GAME,MAX_INFO_FROM_ONE_GAME)
     length = len(board._historyMoveNames)
@@ -80,17 +83,19 @@ def prepare_datas(board, care_about_win = False): # peut etre ne prendre que des
         curr_data = np.dstack((black,white,current, memo[0], memo[1], memo[2], memo[3], memo[4], memo[5], memo[6], memo[7]))
         
         datas.append([curr_data,  np.reshape(goal, 81)])
-        datas.append([np.rot90(curr_data, k=1, axes=(0,1)), np.reshape(np.rot90(goal, k=1, axes=(0,1)), 81)])
-        datas.append([np.rot90(curr_data, k=2, axes=(0,1)), np.reshape(np.rot90(goal, k=2, axes=(0,1)), 81)])
-        datas.append([np.rot90(curr_data, k=3, axes=(0,1)), np.reshape(np.rot90(goal, k=3, axes=(0,1)), 81)])
 
-        curr_data = np.flipud(curr_data)
-        goal = np.flipud(goal)
+        if all_rotations:
+            datas.append([np.rot90(curr_data, k=1, axes=(0,1)), np.reshape(np.rot90(goal, k=1, axes=(0,1)), 81)])
+            datas.append([np.rot90(curr_data, k=2, axes=(0,1)), np.reshape(np.rot90(goal, k=2, axes=(0,1)), 81)])
+            datas.append([np.rot90(curr_data, k=3, axes=(0,1)), np.reshape(np.rot90(goal, k=3, axes=(0,1)), 81)])
 
-        datas.append([curr_data, np.reshape(goal, 81)])
-        datas.append([np.rot90(curr_data, k=1, axes=(0,1)), np.reshape(np.rot90(goal, k=1, axes=(0,1)), 81)])
-        datas.append([np.rot90(curr_data, k=2, axes=(0,1)), np.reshape(np.rot90(goal, k=2, axes=(0,1)), 81)])
-        datas.append([np.rot90(curr_data, k=3, axes=(0,1)), np.reshape(np.rot90(goal, k=3, axes=(0,1)), 81)])
+            curr_data = np.flipud(curr_data)
+            goal = np.flipud(goal)
+
+            datas.append([curr_data, np.reshape(goal, 81)])
+            datas.append([np.rot90(curr_data, k=1, axes=(0,1)), np.reshape(np.rot90(goal, k=1, axes=(0,1)), 81)])
+            datas.append([np.rot90(curr_data, k=2, axes=(0,1)), np.reshape(np.rot90(goal, k=2, axes=(0,1)), 81)])
+            datas.append([np.rot90(curr_data, k=3, axes=(0,1)), np.reshape(np.rot90(goal, k=3, axes=(0,1)), 81)])
 
     return datas
 

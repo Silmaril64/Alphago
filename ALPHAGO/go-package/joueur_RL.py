@@ -84,10 +84,11 @@ import time
 import Goban 
 import numpy as np
 from tensorflow import keras
+from namedGame import prepare_datas
 
 MODEL_PATH = "model.pb"
-MODEL_VALUE = 10 # A constant to calculate the mean in UTC 
-model = keras.models.load_model('.')
+#MODEL_VALUE = 10 # A constant to calculate the mean in UTC # Selon Mr Simon, une moyenne non pondérée suffit
+model = keras.models.load_model('.') #The base model to be used if nothing is given at the initialization
 
 class myPlayer(PlayerInterface):
 
@@ -201,9 +202,10 @@ class myPlayer(PlayerInterface):
         best_child = None
         # loop over each child.
         tempo_board = encode(board) # We will have to push the current move in it
+        policy_prediction = model.predict( [prepare_datas(board, all_rotations = False)[0][0]]) # TODO: Verify if everything's okay with this line
         for child in node.children:
             # calculate the UCT score.
-            win_percentage = child.winning_frac(board.next_player(), encoding) # MODIFIER CETTE LIGNE 
+            win_percentage = (policy_prediction[Board.name_to_flat(child.move)] + child.winning_frac(board.next_player(), encoding)) / 2.0 # TODO: Verifier que name_to_flat donne bien la bonne case
             exploration_factor = math.sqrt(log_rollouts / child.num_rollouts)
             uct_score = win_percentage + temperature * exploration_factor
             # Check if this is the largest we've seen so far.
@@ -294,6 +296,7 @@ class MCTSNode():
     def winning_frac(self, player, encoding):
         tempo_move = flat_to_coord(self.move)
         encoding[tempo_move[0]][tempo_move[1]][not player] = 1
-        proba = model.predict([encoding])
+        #proba = model.predict([encoding])
         encoding[tempo_move[0]][tempo_move[1]][not player] = 0
-        return float(self.win_counts[player] + proba * MODEL_VALUE) / float(self.num_rollouts + MODEL_VALUE)
+        return float(self.win_counts[player]) / float(self.num_rollouts)
+        #return float(self.win_counts[player] + proba * MODEL_VALUE) / float(self.num_rollouts + MODEL_VALUE)

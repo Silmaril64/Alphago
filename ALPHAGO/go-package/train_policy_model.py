@@ -45,7 +45,7 @@ def reconstruct_lists_from_string(s):
         
     
 file_list = os.listdir('./data/')
-with open(file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
+with open("./data/" + file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
     #data = json.load(jsonfile)
     data = jsonfile.read()
     data = reconstruct_lists_from_string(data)
