@@ -7,6 +7,8 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, BatchNormalization, MaxPooling2D, Reshape
 import numpy as np
+from os import listdir
+import random
 
 epochs = 10
 batch_size = 1024
@@ -42,8 +44,8 @@ def reconstruct_lists_from_string(s):
 
         
     
-
-with open('./data/100_iter.json', 'r') as jsonfile:
+file_list = os.listdir('./data/')
+with open(file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
     #data = json.load(jsonfile)
     data = jsonfile.read()
     data = reconstruct_lists_from_string(data)

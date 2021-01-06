@@ -1,11 +1,19 @@
+print("START")
+
 import gzip, os.path
 import json
 from sklearn.model_selection import train_test_split
+print("ok")
 import tensorflow as tf
-import tensorflow.keras
-from tensorflow.keras.models import Sequential
+print("ok")
+from tensorflow import keras
+print("ok")
+from tensorflow.keras import Sequential
+print("ok")
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
+print("ok")
 from tensorflow.keras.layers import Conv2D, BatchNormalization, MaxPooling2D, Reshape
+print("ok")
 import numpy as np
 
 
@@ -17,7 +25,7 @@ import numpy as np
 #print()
 #print(data[0][1])
 
-
+print("-1")
 def calculate_error(Y_pred,Y_test):
   res = [0]*6
   for i in range(len(Y_pred)):
@@ -39,7 +47,7 @@ def calculate_error(Y_pred,Y_test):
 
 
 
-
+print("0")
 model = Sequential([
     Conv2D(128, (5, 5), padding='same', activation = 'relu', data_format='channels_last', input_shape=(9,9,11)),
     Dropout(rate=0.5),
@@ -62,6 +70,7 @@ model = Sequential([
     Dense(81, activation = 'softmax')
 ])
 
+print("1")
 model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])
 
 model.summary()

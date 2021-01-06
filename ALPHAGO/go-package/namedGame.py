@@ -8,11 +8,20 @@ import sys
 import random
 import numpy as np
 import json
-import os
+import os, signal
 
+file_list = os.listdir('./data/')
+nb_files = len(file_list)
+MAX_NB_FILES = 1000
 
-if not os.path.exists('./data/100_iter.json'):
-    os.mknod('./data/100_iter.json')
+if (nb_files <= MAX_NB_FILES):
+    file_name = './data/go_datas_' + str(nb_files) + '.json'
+else:
+    file_name = './data/go_datas_' + str(random.randint(0, nb_files -1)) + '.json'
+    
+if (os.path.exists(file_name)):
+    os.remove(file_name)
+os.mknod(file_name)
     
 
 def fileorpackage(name):
@@ -165,6 +174,14 @@ for i in range(NB_GAMES):
  
         nextplayer = otherplayer
         nextplayercolor = othercolor
+    for line in os.popen("ps ax | grep gnugo | grep -v grep"):  
+            fields = line.split() 
+              
+            # extracting Process ID from the output 
+            pid = fields[0]  
+              
+            # terminating process  
+            os.kill(int(pid), signal.SIGKILL)  
     if bad_move:
         continue
     print("The game is over")
@@ -175,7 +192,7 @@ for i in range(NB_GAMES):
 
     
 
-    with open('./data/100_iter.json', 'a+') as jsonfile:
+    with open(file_name, 'a+') as jsonfile:
         json.dump(DATAS, jsonfile)
         jsonfile.close()
 

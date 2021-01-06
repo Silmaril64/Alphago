@@ -2,5 +2,5 @@
 
 for i in {0..10}
 do
-    python3 namedGame.py
+    python3 train_policy_model.py
 done
