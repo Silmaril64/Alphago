@@ -92,22 +92,28 @@ model = keras.models.load_model('.') #The base model to be used if nothing is gi
 
 class myPlayer(PlayerInterface):
 
-    def __init__(self, i_model = None):
+    def __init__(self, s_model = None, f_model = None):
         self._board = Board()
         self._mycolor = None
-        if (i_model == None):
-            self._model = model
+        if (s_model == None):
+            self._strong_model = model
         else:
-            self._model = i_model
+            self._strong_model = s_model
+
+        if (f_model == None):
+            self._fast_model = model
+        else:
+            self._fast_model = f_model
         
 
     def getPlayerName(self):
         return "RL player"
 
     def encode(self, board):
-        toPush = _historyMoveNames
+        toPush = board._historyMoveNames
         black_stones = np.zeros((9,9), dtype=np.float32)
         white_stones = np.zeros((9,9), dtype=np.float32)
+        memo = [np.zeros((9,9), dtype = int) for z in range(8)]
         if (len(data[i]["list_of_moves"])%2 == 0): # I respect the model convention
             player_turn = np.ones((9,9), dtype=np.float32)
         else:
@@ -119,7 +125,11 @@ class myPlayer(PlayerInterface):
                 white_stones[move[0],move[1]] = 1
             else:
                 black_stones[move[0],move[1]] = 1
-        return(np.dstack((black_stones,white_stones,player_turn)))
+            toPlay = (toPlay + 1) % 2
+        for i in range(8):
+            move_history = name_to_coord(toPush[-i])
+            memo[i,move[0],move[1]] = 1
+        return(np.dstack((black_stones,white_stones,player_turn, memo[0], memo[1], memo[2], memo[3], memo[4], memo[5], memo[6], memo[7])))
             
             
     
@@ -190,6 +200,7 @@ class myPlayer(PlayerInterface):
                 best_pct = child_pct
                 best_move = child.move
         print('Select move %s with win pct %.3f' % (best_move, best_pct))
+        # TODO: Here, get the best root children  
         return best_move
 
     @staticmethod
@@ -202,7 +213,7 @@ class myPlayer(PlayerInterface):
         best_child = None
         # loop over each child.
         tempo_board = encode(board) # We will have to push the current move in it
-        policy_prediction = model.predict( [prepare_datas(board, all_rotations = False)[0][0]]) # TODO: Verify if everything's okay with this line
+        policy_prediction = _strong_model.predict( [prepare_datas(board, all_rotations = False)[0][0]]) # TODO: Verify if everything's okay with this line
         for child in node.children:
             # calculate the UCT score.
             win_percentage = (policy_prediction[Board.name_to_flat(child.move)] + child.winning_frac(board.next_player(), encoding)) / 2.0 # TODO: Verifier que name_to_flat donne bien la bonne case

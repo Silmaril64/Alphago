@@ -33,7 +33,7 @@ def fileorpackage(name):
     return name
 
 
-def prepare_datas(board, care_about_win = False, all_rotations = True): # peut etre ne prendre que des gagnants, ou ne pas prendre en compte le fait qu'il ait perdu ?
+def prepare_datas(board, care_about_win = False, all_rotations = True): # all_rotations also say that you only want the board, not the goal
     datas = []
     nb_uses = random.randint(MIN_INFO_FROM_ONE_GAME,MAX_INFO_FROM_ONE_GAME)
     length = len(board._historyMoveNames)
@@ -46,14 +46,17 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # peut e
     print(winner)
     r = range(length-1)
     moves = board._historyMoveNames
-    espe = length / 2. #On ne peut pas prendre le dernier
-    ecart = length / 4.
-    #Distribution gaussienne pour avoir plus de chances de prendre des données du milieu de partie
-    proba_not_normalized = [ (1./(ecart * np.sqrt(2 * np.pi)) * np.exp((i + 1 - espe) ** 2 / (2. * ecart) ** 2))
+    if all_rotations:
+        espe = length / 2. #On ne peut pas prendre le dernier
+        ecart = length / 4.
+        #Distribution gaussienne pour avoir plus de chances de prendre des données du milieu de partie
+        proba_not_normalized = [ (1./(ecart * np.sqrt(2 * np.pi)) * np.exp((i + 1 - espe) ** 2 / (2. * ecart) ** 2))
                            for i in range(length-1)]
-    norm = np.linalg.norm(proba_not_normalized)
-    proba = [ x / norm for x in proba_not_normalized ]
-    chosen_moves = np.random.choice(r, nb_uses,proba) 
+        norm = np.linalg.norm(proba_not_normalized)
+        proba = [ x / norm for x in proba_not_normalized ]
+        chosen_moves = np.random.choice(r, nb_uses,proba)
+    else:
+        chosen_moves = [length - 1] # Only the last one, because we want a prediction on it
     for i in chosen_moves: #On va s'arrêter au move i, et prédire le suivant
         black = np.zeros((9,9), dtype = int)
         white = np.zeros((9,9), dtype = int)
@@ -64,12 +67,13 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # peut e
         else:
             current = np.zeros((9,9), dtype = int)
 
-        goal_move = board.name_to_coord(moves[i+1])
-        goal = np.zeros((9,9), dtype = int)
-        if care_about_win and ((winner == 1 and current[0][0] != 1) or (winner == 0 and current[0][0] != 0)):
-            goal[goal_move[0]][goal_move[1]] = -1
-        else:
-            goal[goal_move[0]][goal_move[1]] = 1 #Une égalité est traitée comme une victoire (on n'a pas perdu après tout)
+        if all_rotations:
+            goal_move = board.name_to_coord(moves[i+1])
+            goal = np.zeros((9,9), dtype = int)
+            if care_about_win and ((winner == 1 and current[0][0] != 1) or (winner == 0 and current[0][0] != 0)):
+                goal[goal_move[0]][goal_move[1]] = -1
+            else:
+                goal[goal_move[0]][goal_move[1]] = 1 #Une égalité est traitée comme une victoire (on n'a pas perdu après tout)
         
         for j in range(i+1):
             move = board.name_to_coord(moves[j])
@@ -81,10 +85,10 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # peut e
                 memo[i - j][move[0]][move[1]] = 1
                 
         curr_data = np.dstack((black,white,current, memo[0], memo[1], memo[2], memo[3], memo[4], memo[5], memo[6], memo[7]))
-        
-        datas.append([curr_data,  np.reshape(goal, 81)])
+
 
         if all_rotations:
+            datas.append([curr_data,  np.reshape(goal, 81)])
             datas.append([np.rot90(curr_data, k=1, axes=(0,1)), np.reshape(np.rot90(goal, k=1, axes=(0,1)), 81)])
             datas.append([np.rot90(curr_data, k=2, axes=(0,1)), np.reshape(np.rot90(goal, k=2, axes=(0,1)), 81)])
             datas.append([np.rot90(curr_data, k=3, axes=(0,1)), np.reshape(np.rot90(goal, k=3, axes=(0,1)), 81)])
@@ -96,7 +100,8 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # peut e
             datas.append([np.rot90(curr_data, k=1, axes=(0,1)), np.reshape(np.rot90(goal, k=1, axes=(0,1)), 81)])
             datas.append([np.rot90(curr_data, k=2, axes=(0,1)), np.reshape(np.rot90(goal, k=2, axes=(0,1)), 81)])
             datas.append([np.rot90(curr_data, k=3, axes=(0,1)), np.reshape(np.rot90(goal, k=3, axes=(0,1)), 81)])
-
+        else:
+            datas.append([curr_data])
     return datas
 
 
