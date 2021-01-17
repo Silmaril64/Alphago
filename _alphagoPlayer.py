@@ -175,6 +175,11 @@ class myPlayer(PlayerInterface):
                     break
             if valid_move == -1:
                 board.play_move(-1)
+        # TODO convert this random rollout using the following algo :
+        #while not board.is_game_over():
+        #    move_probabilities = fast_policy.predict(board)
+        #    greedy_move = max(move_probabilities)
+        #    board.play_move(greedy_move)
         if (board._nbWHITE > board._nbBLACK):
             return "1-0"
         elif (board._nbWHITE < board._nbBLACK):
