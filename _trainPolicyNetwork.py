@@ -39,7 +39,9 @@ def reconstruct_lists_from_string(s):
 
 epochs = 1
 batch_size = 1024
-model = tensorflow.keras.models.load_model('./models/policyNetwork')       
+
+s_model = tensorflow.keras.models.load_model('./models/strongPolicyNetwork')
+f_model = tensorflow.keras.models.load_model('./models/fastPolicyNetwork')       
     
 file_list = os.listdir('./data/')
 with open("./data/" + file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
@@ -63,8 +65,13 @@ X_train, X_test, Y_train, Y_test = train_test_split(X_data, Y_data, test_size=0.
 X_train = np.asarray(X_train).astype(np.float32)
 Y_train = np.asarray(Y_train).astype(np.float32)
 
-history = model.fit(X_train,Y_train, 
+history = s_model.fit(X_train,Y_train, 
                     batch_size=batch_size, 
-                    epochs=epochs, verbose=1)
+                    epochs=epochs, verbose=2)
 
-model.save('./models/policyNetwork')
+f_model.fit(X_train,Y_train, 
+                    batch_size=batch_size, 
+                    epochs=epochs, verbose=2)
+
+s_model.save('./models/strongPolicyNetwork')
+f_model.save('./models/fastPolicyNetwork')

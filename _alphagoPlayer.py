@@ -38,10 +38,11 @@ class myPlayer(PlayerInterface):
 
     def encode(self, board):
         toPush = board._historyMoveNames
+        lenToPush = len(toPush)
         black_stones = np.zeros((9,9), dtype=np.float32)
         white_stones = np.zeros((9,9), dtype=np.float32)
         memo = [np.zeros((9,9), dtype = int) for z in range(8)]
-        if (len(data[i]["list_of_moves"])%2 == 0): # I respect the model convention
+        if (lenToPush%2 == 0): # I respect the model convention / if (len(data[i]["list_of_moves"])%2 == 0):
             player_turn = np.ones((9,9), dtype=np.float32)
         else:
             player_turn = np.zeros((9,9), dtype=np.float32)
@@ -54,8 +55,9 @@ class myPlayer(PlayerInterface):
                 black_stones[move[0],move[1]] = 1
             toPlay = (toPlay + 1) % 2
         for i in range(8):
-            move_history = name_to_coord(toPush[-i])
-            memo[i,move[0],move[1]] = 1
+            if lenToPush >= i:
+                move_history = name_to_coord(toPush[-i])
+                memo[8-i,move[0],move[1]] = 1
         return(np.dstack((black_stones,white_stones,player_turn, memo[0], memo[1], memo[2], memo[3], memo[4], memo[5], memo[6], memo[7])))
             
             

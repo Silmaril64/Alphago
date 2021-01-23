@@ -57,10 +57,10 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # all_ro
         white = np.zeros((9,9), dtype = int)
         memo = [np.zeros((9,9), dtype = int) for z in range(8)]
         
-        if (i+1) % 2 == 0: #Le coup actuel (après avoir joué i)
-            current = np.ones((9,9), dtype = int)
+        if (i + 1) % 2 == 0: #Le coup actuel (après avoir joué i)
+            current = np.ones((9,9), dtype = int) #The whites, because the blacks have just played
         else:
-            current = np.zeros((9,9), dtype = int)
+            current = np.zeros((9,9), dtype = int) #The blacks, the first move, (0+1)%2 == 1
 
         if all_rotations:
             goal_move = board.name_to_coord(moves[i+1])
@@ -72,7 +72,7 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # all_ro
         
         for j in range(i+1):
             move = board.name_to_coord(moves[j])
-            if j % 2 == 1: # TODO TOFIX black plays first
+            if j % 2 == 0: #black plays first
                 black[move[0]][move[1]] = 1
             else:
                 white[move[0]][move[1]] = 1

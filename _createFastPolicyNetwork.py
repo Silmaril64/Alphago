@@ -9,13 +9,13 @@ from tensorflow.keras.layers import Conv2D, BatchNormalization, MaxPooling2D, Re
 import numpy as np
 
 model = Sequential([
-    Conv2D(64, 5, padding='same', activation = 'relu',    data_format='channels_first', input_shape=(9,9,11)),
-    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_first'),
+    Conv2D(64, 5, padding='same', activation = 'relu',    data_format='channels_last', input_shape=(9,9,11)),
+    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(64, 3, padding='same', activation = 'relu',    data_format='channels_last'),
     Flatten(),
-    Dense(512, activation='relu'),
+    Dense(81, activation='relu'),
 ])
 
 model.compile(loss='mse', optimizer='adam', metrics=['mse', 'mae'])

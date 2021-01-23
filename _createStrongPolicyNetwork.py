@@ -9,19 +9,19 @@ from tensorflow.keras.layers import Conv2D, BatchNormalization, MaxPooling2D, Re
 import numpy as np
 
 model = Sequential([
-    Conv2D(192, 5, padding='same', activation = 'relu',    data_format='channels_first', input_shape=(9,9,11)),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_first'),
-    Conv2D(1  , 1, padding='same', activation = 'softmax', data_format='channels_first'),
+    Conv2D(192, 5, padding='same', activation = 'relu',    data_format='channels_last', input_shape=(9,9,11)),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(192, 3, padding='same', activation = 'relu',    data_format='channels_last'),
+    Conv2D(1  , 1, padding='same', activation = 'softmax', data_format='channels_last'),
     Flatten()
 ])
 
