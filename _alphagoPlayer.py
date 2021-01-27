@@ -11,11 +11,14 @@ import time
 import Goban 
 import numpy as np
 from tensorflow import keras
-from _generateGames import prepare_datas
+from utils import prepare_datas
 
-MODEL_PATH = "model.pb"
+STRONG_BASE_MODEL_PATH = "./models/strongPolicyNetwork"
+#STRONG_BASE_MODEL_PATH = "./models/fastPolicyNetwork"
+FAST_BASE_MODEL_PATH = "./models/fastPolicyNetwork"
 #MODEL_VALUE = 10 # A constant to calculate the mean in UTC # Selon Mr Simon, une moyenne non pondérée suffit
-model = keras.models.load_model('.') #The base model to be used if nothing is given at the initialization
+s_base_model = keras.models.load_model(STRONG_BASE_MODEL_PATH)
+f_base_model = keras.models.load_model(FAST_BASE_MODEL_PATH) #The base model to be used if nothing is given at the initialization
 
 class myPlayer(PlayerInterface):
 
@@ -23,12 +26,12 @@ class myPlayer(PlayerInterface):
         self._board = Board()
         self._mycolor = None
         if (s_model == None):
-            self._strong_model = model
+            self._strong_model = s_base_model
         else:
             self._strong_model = s_model
 
         if (f_model == None):
-            self._fast_model = model
+            self._fast_model = f_base_model
         else:
             self._fast_model = f_model
         
@@ -82,8 +85,7 @@ class myPlayer(PlayerInterface):
         else:
             print("I lost :(")
 
-    @staticmethod
-    def select_move(board_org, max_time=7.4, temperature=1.2):
+    def select_move(self, board_org, max_time=7.4, temperature=1.2):
         start_time = time.time()
         root = MCTSNode(board_org.weak_legal_moves())
         # add nodes (at least 10,000 rollouts per turn)
@@ -92,12 +94,12 @@ class myPlayer(PlayerInterface):
             board = copy.deepcopy(board_org)
             node = root
             while (not node.can_add_child()) and (not board.is_game_over()):
-                node = myPlayer.select_child(node, board, temperature)
+                node = self.select_child(node, board, temperature)
                 #board.push(node.move)
             if node.can_add_child() and not board.is_game_over():
                 node = node.add_random_child(board)
                 #board.push(node.move)
-            winner = myPlayer.simulate_random_game(board)
+            winner = self.simulate_random_game(board)
             while node is not None:
                 node.record_win(winner)
                 node = node.parent
@@ -124,8 +126,7 @@ class myPlayer(PlayerInterface):
         # TODO: Here, get the best root children  
         return best_move
 
-    @staticmethod
-    def select_child(node, board, temperature):
+    def select_child(self, node, board, temperature):
         # upper confidence bound for trees (UCT) metric
         total_rollouts = sum(child.num_rollouts for child in node.children)
         log_rollouts = math.log(total_rollouts)
@@ -133,11 +134,13 @@ class myPlayer(PlayerInterface):
         best_score = -1
         best_child = None
         # loop over each child.
-        tempo_board = encode(board) # We will have to push the current move in it
-        policy_prediction = _strong_model.predict( [prepare_datas(board, all_rotations = False)[0][0]]) # TODO: Verify if everything's okay with this line
+        #tempo_board = encode(board) # We will have to push the current move in it
+        data_prepared = np.array([prepare_datas(board, all_rotations = False)[0][0]], dtype = int)
+        #print(data_prepared, len(data_prepared), len(data_prepared[0]), len(data_prepared[0][0]),  flush = True)
+        policy_prediction = self._strong_model.predict( data_prepared ) # TODO: Verify if everything's okay with this line
         for child in node.children:
             # calculate the UCT score.
-            win_percentage = (policy_prediction[Board.name_to_flat(child.move)] + child.winning_frac(board.next_player(), encoding)) / 2.0 # TODO: Verifier que name_to_flat donne bien la bonne case
+            win_percentage = (policy_prediction[0][child.move] + child.winning_frac(board.next_player())) / 2.0 # TODO: Verifier que name_to_flat donne bien la bonne case
             exploration_factor = math.sqrt(log_rollouts / child.num_rollouts)
             uct_score = win_percentage + temperature * exploration_factor
             # Check if this is the largest we've seen so far.
@@ -147,8 +150,7 @@ class myPlayer(PlayerInterface):
         board.play_move(best_child.move)
         return best_child
 
-    @staticmethod
-    def simulate_random_game(board):
+    def simulate_random_game(self, board):
         def is_point_an_eye(board, coord):
             # We must control 3 out of 4 corners if the point is in the middle
             # of the board; on the edge we must control all corners.
@@ -179,7 +181,7 @@ class myPlayer(PlayerInterface):
                 board.play_move(-1)
         # TODO convert this random rollout using the following algo :
         #while not board.is_game_over():
-        #    move_probabilities = fast_policy.predict(board)
+        #    move_probabilities = self._fast_policy.predict(board)
         #    greedy_move = max(move_probabilities)
         #    board.play_move(greedy_move)
         if (board._nbWHITE > board._nbBLACK):
@@ -229,10 +231,10 @@ class MCTSNode():
     def is_terminal(self, board):
         return board.is_game_over()
 
-    def winning_frac(self, player, encoding):
-        tempo_move = flat_to_coord(self.move)
-        encoding[tempo_move[0]][tempo_move[1]][not player] = 1
+    def winning_frac(self, player):
+        #tempo_move = flat_to_coord(self.move)
+        #encoding[tempo_move[0]][tempo_move[1]][not player] = 1
         #proba = model.predict([encoding])
-        encoding[tempo_move[0]][tempo_move[1]][not player] = 0
+        #encoding[tempo_move[0]][tempo_move[1]][not player] = 0
         return float(self.win_counts[player]) / float(self.num_rollouts)
         #return float(self.win_counts[player] + proba * MODEL_VALUE) / float(self.num_rollouts + MODEL_VALUE)

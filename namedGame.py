@@ -6,6 +6,8 @@ import time
 from io import StringIO
 import sys
 
+print("On commence la partie nommée")
+
 def fileorpackage(name):
     if name.endswith(".py"):
         return name[:-3]
@@ -16,7 +18,7 @@ if len(sys.argv) > 2:
 elif len(sys.argv) > 1:
     classNames = [fileorpackage(sys.argv[1]), 'myPlayer']
 else:
-    classNames = ['myPlayer', 'myPlayer']
+    classNames = ['_alphagoPlayer', '_alphagoPlayer']
 
 b = Goban.Board()
 
@@ -52,14 +54,14 @@ while not b.is_game_over():
     othercolor = Goban.Board.flip(nextplayercolor)
     
     currentTime = time.time()
-    sys.stdout = stringio
+    #sys.stdout = stringio
     move = players[nextplayer].getPlayerMove() # The move must be given by "A1", ... "J8" string coordinates (not as an internal move)
-    sys.stdout = sysstdout
-    playeroutput = stringio.getvalue()
-    stringio.truncate(0)
-    stringio.seek(0)
-    print(("[Player "+str(nextplayer) + "] ").join(playeroutput.splitlines(True)))
-    outputs[nextplayer] += playeroutput
+    #sys.stdout = sysstdout
+    #playeroutput = stringio.getvalue()
+    #stringio.truncate(0)
+    #stringio.seek(0)
+    #print(("[Player "+str(nextplayer) + "] ").join(playeroutput.splitlines(True)))
+    #outputs[nextplayer] += playeroutput
     totalTime[nextplayer] += time.time() - currentTime
     print("Player ", nextplayercolor, players[nextplayer].getPlayerName(), "plays: " + move) #changed 
 
