@@ -169,21 +169,29 @@ class myPlayer(PlayerInterface):
             # Point is on the edge or corner.
             return (4-i_org-i) + friendly_corners == 4
         # ==============================
+        #while not board.is_game_over():
+        #    moves = board.weak_legal_moves()
+        #    random.shuffle(moves)
+        #    valid_move = -1 # PASS
+        #    for move in moves:
+        #        if not(is_point_an_eye(board, move)) and (board.play_move(move)):
+        #            valid_move = move
+        #            break
+        #    if valid_move == -1:
+        #        board.play_move(-1)
+        # TODO convert this random rollout using the following algo :
         while not board.is_game_over():
             moves = board.weak_legal_moves()
-            random.shuffle(moves)
-            valid_move = -1 # PASS
-            for move in moves:
-                if not(is_point_an_eye(board, move)) and (board.play_move(move)):
-                    valid_move = move
-                    break
-            if valid_move == -1:
-                board.play_move(-1)
-        # TODO convert this random rollout using the following algo :
-        #while not board.is_game_over():
-        #    move_probabilities = self._fast_policy.predict(board)
-        #    greedy_move = max(move_probabilities)
-        #    board.play_move(greedy_move)
+            move_probabilities = self._fast_model.predict(np.array([prepare_datas(board, all_rotations = False)[0][0]], dtype = int))
+            max_move = np.argmax(move_probabilities)
+            if max_move in moves:
+                #print("max_move:", max_move)
+                board.play_move(max_move)
+            else:
+                #print("debug: move not found in list:", max_move)
+                move = random.choice(moves)
+                #print("chosen random move",move)
+                board.play_move(move)
         if (board._nbWHITE > board._nbBLACK):
             return "1-0"
         elif (board._nbWHITE < board._nbBLACK):

@@ -54,14 +54,14 @@ while not b.is_game_over():
     othercolor = Goban.Board.flip(nextplayercolor)
     
     currentTime = time.time()
-    #sys.stdout = stringio
+    sys.stdout = stringio
     move = players[nextplayer].getPlayerMove() # The move must be given by "A1", ... "J8" string coordinates (not as an internal move)
-    #sys.stdout = sysstdout
-    #playeroutput = stringio.getvalue()
-    #stringio.truncate(0)
-    #stringio.seek(0)
+    sys.stdout = sysstdout
+    playeroutput = stringio.getvalue()
+    stringio.truncate(0)
+    stringio.seek(0)
     #print(("[Player "+str(nextplayer) + "] ").join(playeroutput.splitlines(True)))
-    #outputs[nextplayer] += playeroutput
+    outputs[nextplayer] += playeroutput
     totalTime[nextplayer] += time.time() - currentTime
     print("Player ", nextplayercolor, players[nextplayer].getPlayerName(), "plays: " + move) #changed 
 
