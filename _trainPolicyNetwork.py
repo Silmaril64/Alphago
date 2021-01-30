@@ -9,6 +9,7 @@ from tensorflow.keras.layers import Conv2D, BatchNormalization, MaxPooling2D, Re
 import numpy as np
 from os import listdir
 import random
+import sys
 
 def reconstruct_lists_from_string(s):
     """Je ne prend pas en compte les nombres à plus de 1 chiffre, car je n'en ai ici pas besoin;
@@ -41,10 +42,17 @@ epochs = 1
 batch_size = 1024
 
 s_model = tensorflow.keras.models.load_model('./models/strongPolicyNetwork')
-f_model = tensorflow.keras.models.load_model('./models/fastPolicyNetwork')       
+if int(sys.argv[2]) == 1:
+    f_model = tensorflow.keras.models.load_model('./models/fastPolicyNetwork')       
     
-file_list = os.listdir('./data/')
-with open("./data/" + file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
+file_list = os.listdir(sys.argv[1])
+
+
+
+
+
+with open(sys.argv[1] + file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
+#with open("./data/" + file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
     #data = json.load(jsonfile)
     data = jsonfile.read()
     data = reconstruct_lists_from_string(data)
@@ -69,9 +77,12 @@ history = s_model.fit(X_train,Y_train,
                     batch_size=batch_size, 
                     epochs=epochs, verbose=2)
 
-f_model.fit(X_train,Y_train, 
+if int(sys.argv[2]) == 1:
+    f_model.fit(X_train,Y_train, 
                     batch_size=batch_size, 
                     epochs=epochs, verbose=2)
 
 s_model.save('./models/strongPolicyNetwork')
-f_model.save('./models/fastPolicyNetwork')
+
+if int(sys.argv[2]) == 1:
+    f_model.save('./models/fastPolicyNetwork')

@@ -93,16 +93,25 @@ class myPlayer(PlayerInterface):
         while(True):
             board = copy.deepcopy(board_org)
             node = root
+            #print("in the while", flush = True)
             while (not node.can_add_child()) and (not board.is_game_over()):
+                
                 node = self.select_child(node, board, temperature)
+                #print(".", end = "")
                 #board.push(node.move)
+            #print("out the while", flush = True)
             if node.can_add_child() and not board.is_game_over():
+                #print("in the add", flush = True)
                 node = node.add_random_child(board)
+                #print("out the add", flush = True)
                 #board.push(node.move)
             winner = self.simulate_random_game(board)
+            #print("in the record", flush = True)
             while node is not None:
                 node.record_win(winner)
                 node = node.parent
+                print(".", end = "")
+            #print("out the record", flush = True)
             if (time.time() - start_time >= max_time):
                 print()
                 break
@@ -180,7 +189,8 @@ class myPlayer(PlayerInterface):
         #    if valid_move == -1:
         #        board.play_move(-1)
         # TODO convert this random rollout using the following algo :
-        while not board.is_game_over():
+        nb_iter = 0
+        while not board.is_game_over() and nb_iter < 1500 : #To avoid going infinite, which appends for ... some reasons ? :/
             moves = board.weak_legal_moves()
             move_probabilities = self._fast_model.predict(np.array([prepare_datas(board, all_rotations = False)[0][0]], dtype = int))
             max_move = np.argmax(move_probabilities)
@@ -192,6 +202,9 @@ class myPlayer(PlayerInterface):
                 move = random.choice(moves)
                 #print("chosen random move",move)
                 board.play_move(move)
+            nb_iter += 1
+            #if nb_iter % 50 == 0:
+                #print("debug:", nb_iter, end = "/ ", flush = True)
         if (board._nbWHITE > board._nbBLACK):
             return "1-0"
         elif (board._nbWHITE < board._nbBLACK):

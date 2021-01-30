@@ -25,15 +25,15 @@ NB_GAMES = 100 #the number of games played in one epoch
 DATAS = []
 VERB = False
 
-file_list = os.listdir('./data/')
+file_list = os.listdir('./data/gnugo/')
 nb_files = len(file_list)
-print("Actuellement, " + str(nb_files) + " sont présents dans ./data/")
+print("Actuellement, " + str(nb_files) + " sont présents dans ./data/gnugo/")
 MAX_NB_FILES = 1000
 
 if (nb_files <= MAX_NB_FILES):
-    file_name = './data/go_datas_' + str(nb_files + 1) + '.json'
+    file_name = './data/gnugo/go_datas_' + str(nb_files + 1) + '.json'
 else:
-    file_name = './data/go_datas_' + str(random.randint(1, nb_files)) + '.json'
+    file_name = './data/gnugo/go_datas_' + str(random.randint(1, nb_files)) + '.json'
     
 if (os.path.exists(file_name)):
     os.remove(file_name)
@@ -148,7 +148,7 @@ if VERB:
     else:
         print("DEUCE")
 
-print(DATAS)
+#print(DATAS)
 
 
 

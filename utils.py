@@ -1,5 +1,6 @@
 import random
 import numpy as np
+from Goban import Board
 
 
 MAX_INFO_FROM_ONE_GAME = 10 #how much info could be used from a single game
@@ -19,7 +20,7 @@ MIN_INFO_FROM_ONE_GAME = 5
 # 10 - move t-7 (all zeroes only one cell set to 1)
 # 11 - move t-8 (all zeroes only one cell set to 1)
 # goal - move t (all zeroes only one cell set to 1, or -1)
-def prepare_datas(board, care_about_win = False, all_rotations = True): # all_rotations also say that you only want the board, not the goal
+def prepare_datas(board, care_about_win = False, all_rotations = True, all_moves = False): # all_rotations also say that you only want the board, not the goal
     datas = []
     nb_uses = random.randint(MIN_INFO_FROM_ONE_GAME,MAX_INFO_FROM_ONE_GAME)
     length = len(board._historyMoveNames)
@@ -29,18 +30,21 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # all_ro
         winner = 0
     else:
         winner = 2
-    print(winner)
+    #print(winner)
     r = range(length-1)
     moves = board._historyMoveNames
     if all_rotations:
-        espe = length / 2. #On ne peut pas prendre le dernier
-        ecart = length / 4.
-        #Distribution gaussienne pour avoir plus de chances de prendre des données du milieu de partie
-        proba_not_normalized = [ (1./(ecart * np.sqrt(2 * np.pi)) * np.exp((i + 1 - espe) ** 2 / (2. * ecart) ** 2))
+        if not(all_moves):
+            espe = length / 2. #On ne peut pas prendre le dernier
+            ecart = length / 4.
+            #Distribution gaussienne pour avoir plus de chances de prendre des données du milieu de partie
+            proba_not_normalized = [ (1./(ecart * np.sqrt(2 * np.pi)) * np.exp((i + 1 - espe) ** 2 / (2. * ecart) ** 2))
                            for i in range(length-1)]
-        norm = np.linalg.norm(proba_not_normalized)
-        proba = [ x / norm for x in proba_not_normalized ]
-        chosen_moves = np.random.choice(r, nb_uses,proba)
+            norm = np.linalg.norm(proba_not_normalized)
+            proba = [ x / norm for x in proba_not_normalized ]
+            chosen_moves = np.random.choice(r, nb_uses,proba)
+        else:
+            chosen_moves = list(range(length-1)) #Take every move (the learning part, where we retrace the entire game)
     else:
         chosen_moves = [length - 1] # Only the last one, because we want a prediction on it
     for i in chosen_moves: #On va s'arrêter au move i, et prédire le suivant
@@ -60,16 +64,24 @@ def prepare_datas(board, care_about_win = False, all_rotations = True): # all_ro
                 goal[goal_move[0]][goal_move[1]] = -1
             else:
                 goal[goal_move[0]][goal_move[1]] = 1 #Une égalité est traitée comme une victoire (on n'a pas perdu après tout)
-        
+        b = Board()
         for j in range(i+1):
-            move = board.name_to_coord(moves[j])
-            print("current move:", move)
-            if j % 2 == 0: #black plays first
-                black[move[0]][move[1]] = 1
-            else:
-                white[move[0]][move[1]] = 1
-            if (i - j) < 8:
-                memo[i - j][move[0]][move[1]] = 1
+            b.push(Board.name_to_flat(moves[j]))
+            #move = board.name_to_coord(moves[j])
+            #if j % 2 == 0: #black plays first
+            #    black[move[0]][move[1]] = 1
+            #else:
+            #    white[move[0]][move[1]] = 1
+            #if (i - j) < 8:
+            #    memo[i - j][move[0]][move[1]] = 1
+        for x in range(9):
+            for y in range(9):
+                p = b._board[Board.flatten((x, Board._BOARDSIZE - y - 1))]
+                if p==Board._WHITE:
+                    white[x][y] = 1
+                elif p==Board._BLACK:
+                    black[x][y] = 1
+                
                 
         curr_data = np.dstack((black,white,current, memo[0], memo[1], memo[2], memo[3], memo[4], memo[5], memo[6], memo[7]))
 
