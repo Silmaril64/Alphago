@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p ./data/RL/
+
 for i in {0..1}
 do
     python3 namedGame.py
