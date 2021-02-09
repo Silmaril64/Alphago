@@ -13,6 +13,12 @@ Le script allProcess.sh permet de lancer toutes les parties. Il attend 4 entiers
 	et en entrainant le strong policy model grâce à elles.
 
 
+EXEMPLES DE LIGNES DE COMMANDES:
+================================
+
+$ ./allProcess 1 1 1 1
+ --> démarrer tous les processus créés (génération de réseaux de neurones, génération de jeux, RL training)
+
 
 PROBLEMES :
 ===========
@@ -22,18 +28,3 @@ Nous n'avons pas pu compléter la tâche dans son intégralité. Plusieurs probl
 	- Le strong policy model ne s'entraine pas, il faudrait peut-être rajouter des couches dans les données d'entrée
 
 	- Les parties continuent trop longtemps, car le modèle ne permet pas de prédire l'action PASS
-
-
-
-EXEMPLES DE LIGNES DE COMMANDES:
-================================
-
-python3 localGame.py
---> Va lancer un match myPlayer.py contre myPlayer.py
-
-python3 namedGame.py myPlayer randomPlayer
---> Va lancer un match entre votre joueur (NOIRS) et le randomPlayer
- (BLANC)
-
- python3 namedGame gnugoPlayer myPlayer
- --> gnugo (level 0) contre votre joueur (très dur à battre)
