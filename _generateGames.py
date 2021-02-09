@@ -16,8 +16,6 @@ def fileorpackage(name):
         return name[:-3]
     return name
 
-
-
 print("######################### STARTING GENERATING DATAS #########################")
 
 NB_GAMES = 100 #the number of games played in one epoch
@@ -147,9 +145,3 @@ if VERB:
         print("BLACK")
     else:
         print("DEUCE")
-
-#print(DATAS)
-
-
-
-

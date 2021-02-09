@@ -1,7 +1,3 @@
-"""# -*- coding: utf-8 -*-
-''' This is the famous random player which (almost) always looses.
-"""
-
 from playerInterface import *
 from Goban import Board
 import random
@@ -14,7 +10,6 @@ from tensorflow import keras
 from utils import prepare_datas
 
 STRONG_BASE_MODEL_PATH = "./models/strongPolicyNetwork"
-#STRONG_BASE_MODEL_PATH = "./models/fastPolicyNetwork"
 FAST_BASE_MODEL_PATH = "./models/fastPolicyNetwork"
 #MODEL_VALUE = 10 # A constant to calculate the mean in UTC # Selon Mr Simon, une moyenne non pondérée suffit
 s_base_model = keras.models.load_model(STRONG_BASE_MODEL_PATH)
@@ -29,12 +24,10 @@ class myPlayer(PlayerInterface):
             self._strong_model = s_base_model
         else:
             self._strong_model = s_model
-
         if (f_model == None):
             self._fast_model = f_base_model
         else:
             self._fast_model = f_model
-        
 
     def getPlayerName(self):
         return "RL player"
@@ -62,9 +55,7 @@ class myPlayer(PlayerInterface):
                 move_history = name_to_coord(toPush[-i])
                 memo[8-i,move[0],move[1]] = 1
         return(np.dstack((black_stones,white_stones,player_turn, memo[0], memo[1], memo[2], memo[3], memo[4], memo[5], memo[6], memo[7])))
-            
-            
-    
+
     def getPlayerMove(self):
         if self._board.is_game_over():
             return "PASS"
@@ -93,25 +84,16 @@ class myPlayer(PlayerInterface):
         while(True):
             board = copy.deepcopy(board_org)
             node = root
-            #print("in the while", flush = True)
             while (not node.can_add_child()) and (not board.is_game_over()):
-                
                 node = self.select_child(node, board, temperature)
-                #print(".", end = "")
                 #board.push(node.move)
-            #print("out the while", flush = True)
             if node.can_add_child() and not board.is_game_over():
-                #print("in the add", flush = True)
                 node = node.add_random_child(board)
-                #print("out the add", flush = True)
                 #board.push(node.move)
             winner = self.simulate_random_game(board)
-            #print("in the record", flush = True)
             while node is not None:
                 node.record_win(winner)
                 node = node.parent
-                print(".", end = "")
-            #print("out the record", flush = True)
             if (time.time() - start_time >= max_time):
                 print()
                 break
@@ -139,13 +121,10 @@ class myPlayer(PlayerInterface):
         # upper confidence bound for trees (UCT) metric
         total_rollouts = sum(child.num_rollouts for child in node.children)
         log_rollouts = math.log(total_rollouts)
-
         best_score = -1
         best_child = None
         # loop over each child.
-        #tempo_board = encode(board) # We will have to push the current move in it
         data_prepared = np.array([prepare_datas(board, all_rotations = False)[0][0]], dtype = int)
-        #print(data_prepared, len(data_prepared), len(data_prepared[0]), len(data_prepared[0][0]),  flush = True)
         policy_prediction = self._strong_model.predict( data_prepared ) # TODO: Verify if everything's okay with this line
         for child in node.children:
             # calculate the UCT score.
@@ -160,47 +139,15 @@ class myPlayer(PlayerInterface):
         return best_child
 
     def simulate_random_game(self, board):
-        def is_point_an_eye(board, coord):
-            # We must control 3 out of 4 corners if the point is in the middle
-            # of the board; on the edge we must control all corners.
-            friendly_corners = 0
-            i_org = i = board._neighborsEntries[coord]
-            while board._neighbors[i] != -1:
-                n = board._board[board._neighbors[i]]
-                if  n == board.next_player():
-                    return False
-                if (n != Board._EMPTY) or (n != board.next_player()):
-                    friendly_corners += 1
-                i += 1
-            if i >= i_org+4:
-                # Point is in the middle.
-                return friendly_corners >= 3
-            # Point is on the edge or corner.
-            return (4-i_org-i) + friendly_corners == 4
-        # ==============================
-        #while not board.is_game_over():
-        #    moves = board.weak_legal_moves()
-        #    random.shuffle(moves)
-        #    valid_move = -1 # PASS
-        #    for move in moves:
-        #        if not(is_point_an_eye(board, move)) and (board.play_move(move)):
-        #            valid_move = move
-        #            break
-        #    if valid_move == -1:
-        #        board.play_move(-1)
-        # TODO convert this random rollout using the following algo :
         nb_iter = 0
         while not board.is_game_over() and nb_iter < 1500 : #To avoid going infinite, which appends for ... some reasons ? :/
             moves = board.weak_legal_moves()
             move_probabilities = self._fast_model.predict(np.array([prepare_datas(board, all_rotations = False)[0][0]], dtype = int))
             max_move = np.argmax(move_probabilities)
             if max_move in moves:
-                #print("max_move:", max_move)
                 board.play_move(max_move)
             else:
-                #print("debug: move not found in list:", max_move)
                 move = random.choice(moves)
-                #print("chosen random move",move)
                 board.play_move(move)
             nb_iter += 1
             #if nb_iter % 50 == 0:
@@ -211,8 +158,6 @@ class myPlayer(PlayerInterface):
             return "0-1"
         else:
             return "1/2-1/2"
-        #return board.result()
-
 
 
 class MCTSNode():

@@ -29,7 +29,6 @@ def reconstruct_lists_from_string(s):
             else: 
                 final.append(tempo)
         elif s[i] == '1' or s[i] == '0':
-            #print(".")
             res[-1].append(signe*int(s[i]))
             signe = 1
         elif s[i] == '-':
@@ -47,27 +46,21 @@ if int(sys.argv[2]) == 1:
     
 file_list = os.listdir(sys.argv[1])
 
-
-
-
-
 with open(sys.argv[1] + file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
 #with open("./data/" + file_list[random.randint(0,len(file_list)-1)], 'r') as jsonfile:
     #data = json.load(jsonfile)
     data = jsonfile.read()
     data = reconstruct_lists_from_string(data)
     tempo = []
-    # TODO TOCHECK what is this ?
+    # TODO TOCHECK
     for x in data:
         tempo += x
     data = tempo
 
-# TODO TOCHECK what is this ?  
+# TODO TOCHECK
 X_data = [data[i][0] for i in range(len(data)) ]
 Y_data = [data[i][1] for i in range(len(data)) ]
-#print(data)
-#print(X_data)
-#print(Y_data)
+
 X_train, X_test, Y_train, Y_test = train_test_split(X_data, Y_data, test_size=0.1)
 
 X_train = np.asarray(X_train).astype(np.float32)

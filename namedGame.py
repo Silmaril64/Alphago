@@ -127,8 +127,6 @@ if VERB:
         print("BLACK")
     else:
         print("DEUCE")
-
-
     
 if LEARN:
     if (os.path.exists(file_name)):
